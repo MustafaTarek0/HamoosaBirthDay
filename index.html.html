@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>For You ♡</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Great+Vibes&family=Caveat+Brush&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+<style>
+  :root{
+    --wine-1:#5c0612;
+    --wine-2:#2d0208;
+    --wine-edge:#3a040c;
+    --pink-soft:#fbcfe8;
+    --pink-blush:#ffe4e6;
+    --ink:#fff4f5;
+    --wax:#7c0a16;
+    --wax-hi:#b21f2d;
+    --paper:#f7efe2;
+    --paper-edge:#e8dcc6;
+  }
+  *{ -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; height:100%; overflow:hidden; background:#1c0205; }
+  body{
+    font-family:'Cormorant Garamond',serif;
+    color:var(--ink);
+  }
+  .hand{ font-family:'Caveat',cursive; }
+  .serif{ font-family:'Cormorant Garamond',serif; }
+  .vibes{ font-family:'Caveat Brush','Great Vibes',cursive; }
+  .aquarelle{ font-family:'Caveat Brush','Great Vibes',cursive; letter-spacing:.5px;
+    text-shadow:0 1px 0 rgba(255,255,255,.4), 1px 1px 3px rgba(124,10,22,.15); }
+
+  /* ---- shared wine background ---- */
+  .wine-bg{
+    position:absolute; inset:0;
+    background:
+      radial-gradient(120% 90% at 50% 12%, #6e0a18 0%, var(--wine-1) 38%, var(--wine-2) 100%);
+  }
+  .wine-bg::before{
+    content:""; position:absolute; inset:0; opacity:.06; mix-blend-mode:screen;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='90' viewBox='0 0 90 90'><g fill='none' stroke='%23ffe4e6' stroke-width='1.4'><path d='M22 30c-4-6-13-4-13 3 0 6 13 13 13 13s13-7 13-13c0-7-9-9-13-3z'/><path d='M67 64c-3-4-9-3-9 2 0 4 9 9 9 9s9-5 9-9c0-5-6-6-9-2z'/></g></svg>");
+    background-size:180px 180px;
+  }
+  .wine-bg::after{
+    content:""; position:absolute; inset:0;
+    background:radial-gradient(120% 120% at 50% 50%, transparent 55%, rgba(0,0,0,.45) 100%);
+  }
+
+  /* ---- screen system ---- */
+  .screen{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    opacity:0; visibility:hidden; transform:scale(1.02); pointer-events:none;
+    transition:opacity .8s ease, transform .8s ease, visibility 0s linear .8s;
+  }
+  .screen.active{ opacity:1; visibility:visible; transform:scale(1); pointer-events:auto;
+    transition:opacity .8s ease, transform .8s ease, visibility 0s; }
+
+  /* sketch line look for svgs */
+  .line-art{ stroke:var(--ink); stroke-width:2; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+  .line-art-thin{ stroke:var(--ink); stroke-width:1.6; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+
+  /* hand underline for buttons */
+  .ul-sketch{ position:relative; }
+  .ul-sketch::after{
+    content:""; position:absolute; left:-6%; right:-6%; bottom:-.18em; height:.5em;
+    background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 12' preserveAspectRatio='none'><path d='M2 7C30 2 60 11 90 5s28-1 28-1' fill='none' stroke='%23ffe4e6' stroke-width='2.4' stroke-linecap='round'/></svg>") no-repeat center/100% 100%;
+    opacity:.9; pointer-events:none;
+  }
+
+  /* floating hearts */
+  .heart-float{
+    position:absolute; bottom:-40px; color:var(--pink-blush);
+    pointer-events:none; will-change:transform,opacity; opacity:0;
+    animation:floatUp linear forwards;
+  }
+  @keyframes floatUp{
+    0%{ transform:translateY(0) translateX(0) rotate(0); opacity:0; }
+    10%{ opacity:.85; }
+    100%{ transform:translateY(-115vh) translateX(var(--drift,0)) rotate(40deg); opacity:0; }
+  }
+
+  /* nav icon cards */
+  .nav-card{ cursor:pointer; transition:transform .45s cubic-bezier(.2,.8,.3,1); }
+  .nav-card:hover{ transform:translateY(-6px); }
+  .nav-card svg{ transition:transform .5s ease, filter .5s ease; filter:drop-shadow(0 0 0 transparent); }
+  .nav-card:hover svg{ transform:scale(1.06) rotate(-1.5deg); filter:drop-shadow(0 6px 18px rgba(255,228,230,.25)); }
+  .nav-card:active{ transform:scale(.97); }
+
+  /* photo slot */
+  .photo-slot{
+    position:relative; overflow:hidden; cursor:pointer; background-size:cover; background-position:center;
+    background-color:rgba(255,244,245,.04);
+    border:1.5px solid rgba(255,228,230,.45);
+    transition:transform .4s ease, box-shadow .4s ease, border-color .3s;
+  }
+  .photo-slot:hover{ transform:translateY(-4px) rotate(var(--tilt,0deg)); box-shadow:0 18px 40px rgba(0,0,0,.45); border-color:var(--pink-blush); }
+  .photo-slot .ph-stripes{
+    position:absolute; inset:0; opacity:.5;
+    background:repeating-linear-gradient(45deg, rgba(255,228,230,.08) 0 10px, transparent 10px 20px);
+  }
+  .photo-slot.filled .ph-hint, .photo-slot.filled .ph-stripes{ display:none; }
+  .ph-hint{
+    position:absolute; inset:0; display:flex; flex-direction:column; gap:.3rem;
+    align-items:center; justify-content:center; text-align:center; padding:10px;
+    color:rgba(255,228,230,.75); font-family:'Caveat',cursive;
+  }
+
+  /* ---- envelope ---- */
+  .env-wrap{ perspective:1800px; }
+  .envelope{
+    position:relative; transition:transform 1s ease;
+    filter:drop-shadow(0 35px 60px rgba(0,0,0,.6));
+  }
+  .env-body{
+    position:absolute; inset:0; border-radius:10px;
+    background:
+      radial-gradient(120% 90% at 30% 0%, #ff5b6e 0%, #e8323f 35%, #c81c2c 70%, #a8121f 100%);
+    box-shadow:
+      inset 0 2px 4px rgba(255,255,255,.35),
+      inset 0 -10px 26px rgba(0,0,0,.35),
+      inset 0 0 0 1px rgba(255,255,255,.08);
+  }
+  .env-body::before{
+    content:""; position:absolute; inset:0; border-radius:10px; opacity:.5; mix-blend-mode:overlay;
+    background:
+      repeating-linear-gradient(115deg, rgba(255,255,255,.05) 0 2px, transparent 2px 5px),
+      radial-gradient(60% 50% at 70% 10%, rgba(255,255,255,.25), transparent 60%);
+  }
+  .env-flap-front{
+    position:absolute; left:0; right:0; bottom:0; height:62%; z-index:6; border-radius:0 0 10px 10px;
+    background:linear-gradient(170deg,#d6303c,#a3141f 75%);
+    clip-path:polygon(0 38%, 50% 100%, 100% 38%, 100% 100%, 0 100%);
+    box-shadow:inset 0 8px 22px rgba(0,0,0,.35), inset 0 -2px 0 rgba(255,255,255,.08);
+  }
+  .env-flap-left{ position:absolute; inset:0; z-index:4;
+    background:linear-gradient(100deg,#e3404c,#b81b27 80%);
+    clip-path:polygon(0 0, 52% 50%, 0 100%);
+    box-shadow:inset 4px 0 14px rgba(0,0,0,.2); }
+  .env-flap-right{ position:absolute; inset:0; z-index:4;
+    background:linear-gradient(260deg,#e3404c,#b81b27 80%);
+    clip-path:polygon(100% 0, 48% 50%, 100% 100%);
+    box-shadow:inset -4px 0 14px rgba(0,0,0,.2); }
+  .env-flap-top{
+    position:absolute; left:0; right:0; top:0; height:62%; z-index:9;
+    transform-origin:top center; transition:transform 1.2s cubic-bezier(.6,.05,.2,1), z-index 0s linear .6s;
+    background:
+      linear-gradient(165deg,#ff6b78 0%,#e8323f 45%,#b81b27 100%);
+    clip-path:polygon(0 0, 100% 0, 50% 100%);
+    box-shadow:inset 0 -10px 26px rgba(0,0,0,.3), inset 0 3px 6px rgba(255,255,255,.3);
+  }
+  .env-flap-top::after{
+    content:""; position:absolute; left:50%; top:0; width:1px; height:100%;
+    background:linear-gradient(180deg, rgba(255,255,255,.35), transparent 70%);
+    transform:translateX(-50%); opacity:.5;
+  }
+  .envelope.open .env-flap-top{ transform:rotateX(180deg); z-index:1; }
+  .env-letter-peek{
+    position:absolute; left:6%; right:6%; top:10%; bottom:8%; z-index:7;
+    background:linear-gradient(180deg,var(--paper),var(--paper-edge));
+    border-radius:4px; transform:translateY(0); transition:transform 1.3s cubic-bezier(.5,0,.2,1);
+    box-shadow:0 -6px 18px rgba(0,0,0,.2);
+  }
+  .envelope.open.lift .env-letter-peek{ transform:translateY(-128%); }
+
+  /* wax stamp */
+  .wax{
+    position:absolute; left:50%; top:42%; transform:translate(-50%,-50%); z-index:12;
+    width:112px; height:112px; cursor:pointer;
+    transition:transform .5s ease, opacity .7s ease, filter .5s ease;
+  }
+  .wax:hover{ transform:translate(-50%,-50%) scale(1.06) rotate(-2deg); }
+  .wax.cracked{ transform:translate(-50%,-50%) scale(.6) rotate(10deg); opacity:0; filter:blur(2px); }
+  .wax-heart {
+  position:absolute; inset:0; border-radius:50%;
+  background: radial-gradient(circle at 30% 30%, #ff5b6e, #a8121f); /* Red gradient */
+  box-shadow: inset 0 -6px 10px rgba(0,0,0,.3), 0 4px 10px rgba(0,0,0,.3);
+  display:flex; align-items:center; justify-content:center;
+}
+
+/* Update the inner content to display 'H' */
+.wax-heart::after {
+  content:"H";
+  font-family:'Cormorant Garamond', serif;
+  font-weight: 700;
+  font-size: 40px;
+  color: #f7efe2;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+  /* letter parchment styling */
+  .letter-card{
+    position:relative; background:linear-gradient(180deg,#fbf5ea,#f3e9d6);
+    color:#3a1414 !important; border-radius:12px;
+    box-shadow:0 40px 80px rgba(0,0,0,.6), inset 0 0 60px rgba(120,70,40,.08);
+  }
+  .letter-frame{ position:absolute; inset:14px; border:1px solid #caa66f; border-radius:4px; pointer-events:none; }
+  .letter-frame::before{ content:""; position:absolute; inset:5px; border:1px solid rgba(202,166,111,.5); border-radius:3px; }
+  .frame-corner{ position:absolute; width:64px; height:64px; pointer-events:none; opacity:.85; }
+  .frame-corner.tl{ top:-6px; left:-6px; }
+  .frame-corner.tr{ top:-6px; right:-6px; transform:scaleX(-1); }
+  .frame-corner.bl{ bottom:-6px; left:-6px; transform:scaleY(-1); }
+  .frame-corner.br{ bottom:-6px; right:-6px; transform:scale(-1,-1); }
+  .frame-cake{ position:absolute; bottom:6px; left:50%; transform:translateX(-50%); width:64px; height:64px; opacity:.92; pointer-events:none; }
+  .lline{ font-family:'Caveat Brush','Great Vibes',cursive; font-size:1.25em; min-height:1.4em; color:#3a1414 !important; }
+  .iloveyou{ opacity:0; transform:scale(.8); transition:opacity 1.4s ease, transform 1.4s cubic-bezier(.2,.8,.3,1); }
+  .iloveyou.show{ opacity:1; transform:none; }
+
+  .mini-card{ opacity:0; transform:translateY(10px) rotate(-4deg); transition:opacity .8s ease, transform .8s ease; }
+  .mini-card.show{ opacity:1; transform:rotate(-4deg); }
+
+  /* overlay */
+  .overlay{ position:fixed; inset:0; z-index:60; display:flex; align-items:center; justify-content:center;
+    background:rgba(20,2,4,.82); backdrop-filter:blur(6px); opacity:0; visibility:hidden; transition:opacity .4s; }
+  .overlay.show{ opacity:1; visibility:visible; }
+
+  ::-webkit-scrollbar{ width:0; height:0; }
+
+  .fade-in-up{ animation:fadeUp 1s ease both; }
+  @keyframes fadeUp{ from{ opacity:0; transform:translateY(24px);} to{ opacity:1; transform:none; } }
+  .delay-1{ animation-delay:.2s; } .delay-2{ animation-delay:.45s; } .delay-3{ animation-delay:.7s; } .delay-4{ animation-delay:.95s; }
+
+  .scrollable{ overflow-y:auto; -webkit-overflow-scrolling:touch; }
+
+  .back-btn{ background:rgba(28,2,5,.55); backdrop-filter:blur(4px); padding:.35em .85em; border-radius:999px;
+    border:1px solid rgba(255,228,230,.25); transition:background .3s, transform .3s; }
+  .back-btn:hover{ background:rgba(28,2,5,.8); transform:translateX(-2px); }
+
+  /* Gallery Entrance Keyframes */
+  @keyframes danceInLeft {
+    0% { opacity: 0; transform: translateX(-100vw) translateY(30px) rotate(-15deg); }
+    50% { opacity: 0.5; transform: translateX(15px) translateY(-10px) rotate(5deg); }
+    75% { transform: translateX(-5px) translateY(5px) rotate(-2deg); }
+    100% { opacity: 1; transform: translateX(0) translateY(0) rotate(var(--tilt, 0deg)); }
+  }
+  @keyframes danceInRight {
+    0% { opacity: 0; transform: translateX(100vw) translateY(30px) rotate(15deg); }
+    50% { opacity: 0.5; transform: translateX(-15px) translateY(-10px) rotate(-5deg); }
+    75% { transform: translateX(5px) translateY(5px) rotate(2deg); }
+    100% { opacity: 1; transform: translateX(0) translateY(0) rotate(var(--tilt, 0deg)); }
+  }
+  .animate-dance-left { animation: danceInLeft 1.4s cubic-bezier(0.25, 1, 0.5, 1) both; }
+  .animate-dance-right { animation: danceInRight 1.4s cubic-bezier(0.25, 1, 0.5, 1) both; }
+
+  /* Beautiful layout wrap fix for the birthday letter content */
+  #actualLetterFrame {
+    max-width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+    position: relative;
+  }
+  #actualLetterFrame:before{
+   content:'🌸 🌹';
+   position:absolute; top:-25px; left:5px; font-size:24px;
+  }
+  #actualLetterFrame:after{
+   content:'🎂 🌷';
+   position:absolute; bottom:-25px; right:5px; font-size:24px;
+  }
+</style>
+</head>
+<body>
+
+<div id="app" class="relative w-screen h-screen">
+
+  <section id="screen-intro" class="screen active" data-screen-label="Intro">
+    <div class="wine-bg"></div>
+    <div class="relative z-10 w-full h-full flex flex-col items-center justify-center px-6 text-center select-none">
+      <div class="fade-in-up delay-1">
+        <p class="serif tracking-[.5em] text-[clamp(10px,2.6vw,15px)] uppercase text-pink-100/70 mb-2">♡ &nbsp; a little something &nbsp; ♡</p>
+        <h1 class="hand font-bold leading-[.9] text-[clamp(64px,18vw,170px)]" style="text-shadow:0 4px 30px rgba(0,0,0,.4)">HI, My LOVELY HAMOOSA!</h1>
+      </div>
+      <div class="relative my-3 fade-in-up delay-2" style="width:min(560px,86vw);height:min(230px,42vh)">
+        <p class="hand absolute left-0 top-6 text-[clamp(15px,4vw,26px)] text-pink-100/90 leading-tight" style="transform:rotate(-9deg);max-width:60%">
+           Happy Birthday my&nbsp;love,<br/>do you want to see a<br/>little surprise for&nbsp;you?
+        </p>
+        <svg viewBox="0 0 120 120" class="absolute right-2 top-0 w-[clamp(110px,26vw,170px)]" style="transform:rotate(6deg)">
+          <path class="line-art-thin" d="M60 96c-22-15-40-29-40-50 0-13 10-22 22-22 8 0 14 4 18 11 4-7 10-11 18-11 12 0 22 9 22 22 0 21-18 35-40 50z"/>
+          <g class="line-art-thin" opacity=".85">
+            <path d="M30 34c-6-4-13-3-15 3M90 34c6-4 13-3 15 3M60 16c0-5 3-9 8-9M48 18c-2-4-1-8 3-10M74 19c2-4 6-6 9-3"/>
+            <circle cx="26" cy="40" r="3"/><circle cx="95" cy="41" r="3"/><circle cx="60" cy="11" r="3"/>
+          </g>
+        </svg>
+      </div>
+      <div class="relative z-20 mt-2 flex items-center justify-center gap-10 fade-in-up delay-3" style="min-height:120px">
+        <button id="yesBtn" class="hand ul-sketch font-bold text-[clamp(34px,9vw,68px)] text-pink-50 px-4 transition-transform duration-300 relative z-40">YES&nbsp;!</button>
+      </div>
+      <button id="noBtn" class="hand fixed text-pink-100/80 text-[clamp(18px,5vw,30px)] z-30" style="left:50%;top:auto;bottom:14%;transform:translateX(120px)">no,&nbsp;thanks.
+        <span class="block h-[3px] w-3/4 mx-auto mt-[-2px] bg-pink-100/50 rounded-full" style="transform:rotate(-2deg)"></span>
+      </button>
+    </div>
+  </section>
+
+  <section id="screen-menu" class="screen" data-screen-label="Menu">
+    <div class="wine-bg"></div>
+    <div class="relative z-10 w-full h-full flex flex-col items-center justify-center px-6 text-center">
+      <svg class="absolute left-[7%] top-[11%] w-[clamp(64px,12vw,120px)]" viewBox="0 0 120 90" id="bowL">
+        <g class="line-art-thin">
+          <path d="M60 40 C 34 14, 8 22, 20 40 C 8 58, 34 66, 60 40"/>
+          <path d="M60 40 C 86 14, 112 22, 100 40 C 112 58, 86 66, 60 40"/>
+          <circle cx="60" cy="40" r="6"/>
+          <path d="M58 45 C 50 64, 44 76, 38 86"/>
+          <path d="M62 45 C 70 64, 76 76, 82 86"/>
+        </g>
+      </svg>
+      <svg class="absolute right-[7%] top-[11%] w-[clamp(64px,12vw,120px)]" viewBox="0 0 120 90"><use href="#bowL"/></svg>
+
+      <h2 class="hand font-bold leading-[.85] text-[clamp(48px,13vw,128px)] mb-1" style="text-shadow:0 4px 26px rgba(0,0,0,.4)">THESE&nbsp;ARE</h2>
+      <h2 class="hand font-bold leading-[.85] text-[clamp(48px,13vw,128px)]">FOR&nbsp;YOU</h2>
+      <p class="serif italic tracking-widest text-pink-100/70 text-[clamp(12px,3vw,18px)] mt-3">pick one, my love</p>
+
+      <div class="mt-8 sm:mt-12 grid grid-cols-3 gap-4 sm:gap-12 w-full max-w-3xl">
+        <div class="nav-card flex flex-col items-center gap-3" data-go="gallery">
+          <svg viewBox="0 0 120 96" class="w-full max-w-[150px]">
+            <g class="line-art">
+              <path d="M14 34 h18 l8-12 h40 l8 12 h18 a8 8 0 0 1 8 8 v36 a8 8 0 0 1-8 8 H14 a8 8 0 0 1-8-8 V42 a8 8 0 0 1 8-8z"/>
+              <circle cx="60" cy="60" r="18"/><circle cx="60" cy="60" r="9"/>
+              <circle cx="92" cy="44" r="2.4"/>
+            </g>
+          </svg>
+          <span class="hand text-[clamp(16px,4.4vw,26px)] text-pink-50">our pictures</span>
+        </div>
+        <div class="nav-card flex flex-col items-center gap-3" data-go="music">
+          <svg viewBox="0 0 120 96" class="w-full max-w-[150px]">
+            <g class="line-art">
+              <path d="M22 64 V52 a38 38 0 0 1 76 0 v12"/>
+              <rect x="14" y="60" width="18" height="30" rx="8"/>
+              <rect x="88" y="60" width="18" height="30" rx="8"/>
+            </g>
+          </svg>
+          <span class="hand text-[clamp(16px,4.4vw,26px)] text-pink-50">Song for you</span>
+        </div>
+        <div class="nav-card flex flex-col items-center gap-3" data-go="envelope">
+          <svg viewBox="0 0 120 96" class="w-full max-w-[150px]">
+            <g class="line-art">
+              <rect x="16" y="24" width="88" height="64" rx="6"/>
+              <path d="M16 30 L60 62 L104 30"/>
+              <path d="M70 56 c0-6 9-6 9 1 0 4-9 9-9 9s-9-5-9-9c0-7 9-7 9-1z" stroke-width="1.6"/>
+            </g>
+          </svg>
+          <span class="hand text-[clamp(16px,4.4vw,26px)] text-pink-50">my heart</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="screen-gallery" class="screen overflow-x-hidden" data-screen-label="Gallery">
+    <div class="wine-bg"></div>
+    <div class="hearts-layer absolute inset-0 z-[5] pointer-events-none" data-hearts></div>
+    <div class="relative z-10 w-full h-full flex flex-col px-5 sm:px-10 py-6 sm:py-9">
+      <div class="flex items-center shrink-0">
+        <button class="back-btn hand text-pink-50 text-[clamp(16px,4vw,24px)] flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-arrow-left-long"></i> back to menu</button>
+      </div>
+      <h3 class="hand font-bold text-center text-[clamp(34px,9vw,72px)] mt-3 leading-none shrink-0">our pictures</h3>
+      <p class="serif italic text-center text-pink-100/55 text-[clamp(12px,3vw,16px)] mb-5 shrink-0">tap a frame to view full image</p>
+      <div class="scrollable flex-1 pb-6">
+        <div id="galleryGrid" class="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="screen-music" class="screen" data-screen-label="Music">
+    <div class="wine-bg"></div>
+    <div class="hearts-layer absolute inset-0 z-[5] pointer-events-none" data-hearts></div>
+    <div class="relative z-10 w-full h-full flex flex-col items-center justify-center px-6">
+      <button class="back-btn hand text-pink-50 text-[clamp(16px,4vw,24px)] flex items-center gap-2 absolute left-5 top-6 sm:left-10"><i class="fa-solid fa-arrow-left-long"></i> back to menu</button>
+      <svg class="absolute left-[8%] bottom-[10%] w-[clamp(50px,11vw,110px)] opacity-70" viewBox="0 0 100 120" id="flowerA">
+        <g class="line-art-thin">
+          <path d="M50 120 C 50 80 40 70 40 55"/>
+          <g transform="translate(50 40)">
+            <ellipse cx="0" cy="-14" rx="8" ry="13"/><ellipse cx="13" cy="-4" rx="8" ry="13" transform="rotate(72 13 -4)"/>
+            <ellipse cx="8" cy="12" rx="8" ry="13" transform="rotate(144 8 12)"/><ellipse cx="-8" cy="12" rx="8" ry="13" transform="rotate(216 -8 12)"/>
+            <ellipse cx="-13" cy="-4" rx="8" ry="13" transform="rotate(288 -13 -4)"/><circle cx="0" cy="0" r="6"/>
+          </g>
+          <path d="M44 78 c-12-2-18-10-16-18 8-2 16 6 16 18z"/>
+        </g>
+      </svg>
+      <svg class="absolute right-[8%] top-[12%] w-[clamp(46px,10vw,100px)] opacity-70" viewBox="0 0 100 120" style="transform:rotate(18deg)"><use href="#flowerA"/></svg>
+
+      <h3 class="hand font-bold text-center text-[clamp(38px,10vw,82px)] leading-none mb-2 whitespace-nowrap">Gift song</h3>
+      <p class="serif italic tracking-widest text-pink-100/70 mb-6 text-[clamp(12px,3vw,17px)]">the one that always reminds me of you</p>
+
+      <div class="relative w-full max-w-md rounded-[22px] p-4 sm:p-5" style="background:linear-gradient(160deg,rgba(255,228,230,.10),rgba(255,228,230,.03));border:1px solid rgba(255,228,230,.35);box-shadow:0 30px 60px rgba(0,0,0,.5)">
+        <div class="rounded-xl overflow-hidden border border-pink-100/30" style="aspect-ratio:16/9;background:#1c0205">
+          <iframe id="ytPlayer" class="w-full h-full" src="https://player.cloudinary.com/embed/?cloud_name=dqlwhj7vg&public_id=hozier_gbarco" title="Our song" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" allowfullscreen></iframe>
+        </div>
+        <div class="flex items-center justify-between mt-4 px-1">
+          <div class="text-left">
+            <p class="hand text-pink-50 text-[clamp(20px,5vw,28px)] leading-none" id="songTitle">Sparks</p>
+            <p class="serif italic text-pink-100/70 text-[clamp(12px,3vw,15px)]" id="songArtist">Coldplay</p>
+          </div>
+          <i class="fa-solid fa-heart text-pink-200/80 text-2xl"></i>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="screen-envelope" class="screen" data-screen-label="Envelope">
+    <div class="wine-bg"></div>
+    <button class="back-btn hand text-pink-50 text-[clamp(16px,4vw,24px)] flex items-center gap-2 absolute left-5 top-6 sm:left-10 z-40"><i class="fa-solid fa-arrow-left-long"></i> back to menu</button>
+
+    <div id="envStage" class="relative z-10 w-full h-full flex flex-col items-center justify-center px-6">
+      <p id="envHint" class="hand text-pink-100/80 text-[clamp(18px,5vw,30px)] mb-8 text-center">press the seal to open ♡</p>
+      <div class="env-wrap">
+        <div id="envelope" class="envelope" style="width:min(400px,82vw);height:min(280px,58vw)">
+          <div class="env-body"></div>
+          <div class="env-letter-peek"></div>
+          <div class="env-flap-left"></div>
+          <div class="env-flap-right"></div>
+          <div class="env-flap-front"></div>
+          <div class="env-flap-top"></div>
+          <div id="wax" class="wax">
+            <div class="wax-heart"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="letterStage" class="absolute inset-0 z-20 flex items-center justify-center px-4 pt-20 pb-8 opacity-0 invisible transition-all duration-700">
+      <div class="letter-card w-full max-w-[560px] max-h-[88vh] scrollable px-7 sm:px-12 py-10 sm:py-14">
+        <div class="letter-frame">
+          <svg class="frame-corner tl" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+            <g fill="none" stroke="#caa66f" stroke-width="1.4">
+              <path d="M4 4C18 6 26 14 28 28" stroke-linecap="round"/>
+              <circle cx="10" cy="9" r="5" fill="#f7c6d3" stroke="#caa66f"/>
+              <circle cx="18" cy="6" r="4" fill="#fbe0e8" stroke="#caa66f"/>
+              <circle cx="22" cy="14" r="4.5" fill="#f3aebb" stroke="#caa66f"/>
+              <circle cx="14" cy="17" r="3.5" fill="#fde9ef" stroke="#caa66f"/>
+            </g>
+          </svg>
+          <svg class="frame-corner tr" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#caa66f" stroke-width="1.4"><path d="M4 4C18 6 26 14 28 28" stroke-linecap="round"/><circle cx="10" cy="9" r="5" fill="#f7c6d3" stroke="#caa66f"/><circle cx="18" cy="6" r="4" fill="#fbe0e8" stroke="#caa66f"/></g></svg>
+          <svg class="frame-corner bl" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#caa66f" stroke-width="1.4"><path d="M4 4C18 6 26 14 28 28" stroke-linecap="round"/><circle cx="10" cy="9" r="5" fill="#f7c6d3" stroke="#caa66f"/></g></svg>
+          <svg class="frame-corner br" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#caa66f" stroke-width="1.4"><path d="M4 4C18 6 26 14 28 28" stroke-linecap="round"/><circle cx="10" cy="9" r="5" fill="#f7c6d3" stroke="#caa66f"/></g></svg>
+          <svg class="frame-cake" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+            <g fill="none" stroke="#caa66f" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="14" y="34" width="36" height="18" rx="2" fill="#fde0e8"/>
+              <path d="M14 44c4 2 8-2 12 0s8-2 12 0" stroke="#caa66f"/>
+            </g>
+          </svg>
+        </div>
+        
+        <div id="actualLetterFrame" class="relative text-center">
+          <p class="vibes text-[clamp(34px,9vw,56px)] text-[#7c0a16] leading-none mb-2">My Love,</p>
+          <div class="flex items-center justify-center gap-2 text-[#caa66f] mb-7">
+            <i class="fa-solid fa-heart text-xs"></i><span class="serif italic tracking-[.3em] text-sm">happy birthday ya a7la hamoosa fel donya</span><i class="fa-solid fa-heart text-xs"></i>
+          </div>
+
+          <div id="letterBody" class="serif text-[#3a1414] text-[clamp(16px,4.1vw,20px)] leading-[1.85] space-y-2 text-center"></div>
+
+          <div class="iloveyou mt-8" id="iLoveYou">
+            <p class="vibes text-[clamp(52px,15vw,96px)] text-[#7c0a16] leading-none">I Love You</p>
+          </div>
+
+          <p class="vibes text-[clamp(26px,7vw,40px)] text-[#7c0a16] mt-8 mb-1">Forever Yours, Mustafa</p>
+
+          <div class="mini-card inline-flex flex-col items-center mt-3" id="miniCard">
+            <div id="miniSlot" class="photo-slot rounded-md filled" data-id="mini_card_slot" data-img="https://i.imgur.com/o4g4bbS.jpeg" style="width:96px;height:120px;--tilt:-4deg;transform:rotate(-4deg); background-image: url('https://i.imgur.com/o4g4bbS.jpeg');">
+              <div class="ph-stripes"></div>
+            </div>
+            <span class="serif italic text-[#b07a86] text-xs mt-2">tap to view ♡</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div id="imgOverlay" class="overlay">
+  <div class="relative" style="max-width:90vw;max-height:86vh">
+    <div class="p-3 rounded-lg" style="background:linear-gradient(160deg,#fbf5ea,#efe2cc);box-shadow:0 30px 80px rgba(0,0,0,.7)">
+      <div class="p-2 border border-[#caa66f] rounded">
+        <img id="overlayImg" alt="us" class="block rounded max-w-full" style="max-height:74vh" />
+      </div>
+      <p class="vibes text-center text-[#7c0a16] text-3xl mt-1">Your snow flower ♡</p>
+    </div>
+    <button id="overlayClose" class="absolute -top-4 -right-4 w-11 h-11 rounded-full bg-[#7c0a16] text-pink-50 text-xl flex items-center justify-center shadow-lg hover:scale-110 transition-transform"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+</div>
+
+<script>
+(function(){
+
+const screens = {
+  intro:    document.getElementById('screen-intro'),
+  menu:     document.getElementById('screen-menu'),
+  gallery:  document.getElementById('screen-gallery'),
+  music:    document.getElementById('screen-music'),
+  envelope: document.getElementById('screen-envelope'),
+};
+
+let current='intro';
+
+// History State Controller for Safe Browsing / Gesture Back Interactions
+function show(name, pushToHistory = true){
+  if(name===current) return;
+  if(current==='music'){ const f=document.getElementById('ytPlayer'); const s=f.src; f.src=s; }
+  
+  screens[current].classList.remove('active');
+  current=name;
+  screens[name].classList.add('active');
+
+  if(pushToHistory) {
+    window.history.pushState({ screen: name }, "");
+  }
+
+  if(name==='gallery'){
+    document.querySelectorAll('#galleryGrid > div').forEach((el)=>{
+      const cls = el.className.includes('animate-dance-left') ? 'animate-dance-left' : 'animate-dance-right';
+      el.classList.remove('animate-dance-left','animate-dance-right');
+      void el.offsetWidth;
+      el.classList.add(cls);
+    });
+  }
+
+  if(name==='gallery'||name==='music') startHearts(screens[name].querySelector('[data-hearts]'));
+  else stopHearts();
+  if(name==='envelope') resetEnvelope();
+}
+
+// Global browser popstate router interception
+window.addEventListener('popstate', function(event) {
+  if (event.state && event.state.screen) {
+    show(event.state.screen, false);
+  } else {
+    show('menu', false);
+  }
+});
+
+// Set baseline layout target stack point
+window.history.replaceState({ screen: 'intro' }, "");
+
+const noBtn=document.getElementById('noBtn');
+const yesBtn=document.getElementById('yesBtn');
+let yesScale=1;
+function escapeNo(){
+  const pad=20;
+  const w=noBtn.offsetWidth, h=noBtn.offsetHeight;
+  const maxX=window.innerWidth - w - pad, maxY=window.innerHeight - h - pad;
+  const x=Math.max(pad, Math.random()*maxX);
+  const y=Math.max(pad, Math.random()*maxY);
+  noBtn.style.left=x+'px';
+  noBtn.style.top=y+'px';
+  noBtn.style.bottom='auto';
+  noBtn.style.transform='translateX(0) rotate('+(Math.random()*16-8)+'deg)';
+  yesScale=Math.min(2.1, yesScale+0.12);
+  yesBtn.style.transform='scale('+yesScale+')';
+}
+noBtn.addEventListener('mouseenter', escapeNo);
+noBtn.addEventListener('mousedown', e=>{ e.preventDefault(); escapeNo(); });
+noBtn.addEventListener('touchstart', e=>{ e.preventDefault(); escapeNo(); }, {passive:false});
+noBtn.addEventListener('click', e=>{ e.preventDefault(); escapeNo(); });
+
+yesBtn.addEventListener('click', function() {
+  window.history.replaceState({ screen: 'menu' }, "");
+  show('menu', false);
+});
+
+document.querySelectorAll('[data-go]').forEach(c=>{
+  c.addEventListener('click', ()=> show(c.dataset.go));
+});
+
+document.querySelectorAll('.back-btn').forEach(b=> b.addEventListener('click', ()=> window.history.back()));
+
+let heartTimer=null, heartLayer=null;
+function startHearts(layer){
+  stopHearts(); heartLayer=layer;
+  for(let i=0;i<8;i++) setTimeout(spawnHeart, i*260);
+  heartTimer=setInterval(spawnHeart, 520);
+}
+function stopHearts(){ if(heartTimer){ clearInterval(heartTimer); heartTimer=null; } }
+function spawnHeart(){
+  if(!heartLayer) return;
+  const h=document.createElement('i');
+  h.className='fa-solid fa-heart heart-float';
+  const size=12+Math.random()*26;
+  h.style.left=(Math.random()*100)+'%';
+  h.style.fontSize=size+'px';
+  h.style.opacity=(0.35+Math.random()*0.45);
+  h.style.setProperty('--drift',(Math.random()*120-60)+'px');
+  const dur=6+Math.random()*5;
+  h.style.animationDuration=dur+'s';
+  h.style.color = Math.random()>0.5 ? '#ffe4e6' : '#fbcfe8';
+  heartLayer.appendChild(h);
+  setTimeout(()=>h.remove(), dur*1000+200);
+}
+
+function wireSlot(slot){
+  slot.addEventListener('click', (e)=>{
+    if(slot.classList.contains('filled')){
+      openOverlay(slot.dataset.img); return;
+    }
+  });
+}
+
+(function buildGallery(){
+  const grid=document.getElementById('galleryGrid');
+  const tilts=['-3deg','2deg','-2deg','3deg','-2deg','2deg'];
+  const captions=['us','my favorite','that day','always','you ♡','el moftarya ♡'];
+  
+  const imgurLinks = [
+    "https://i.imgur.com/Yp6SAsR.jpeg",
+    "https://i.imgur.com/Sy1VKVx.jpeg",
+    "https://i.imgur.com/SzLBdei.jpeg",
+    "https://i.imgur.com/APcNBp6.jpeg",
+    "https://i.imgur.com/ct2Wytm.jpeg",
+    "https://i.imgur.com/1ryS1tC.jpeg"
+  ];
+
+  for(let i=0;i<6;i++){
+    const wrap=document.createElement('div');
+    const danceDirection = (i % 2 === 0) ? 'animate-dance-left' : 'animate-dance-right';
+    wrap.className = `flex flex-col items-center ${danceDirection}`;
+    wrap.style.animationDelay = `${i * 150}ms`;
+    
+    const slot=document.createElement('div');
+    slot.className='photo-slot rounded-md w-full';
+    slot.style.aspectRatio=(i%2===0)?'3/4':'1/1';
+    slot.style.setProperty('--tilt', tilts[i]);
+    slot.dataset.id='gallery_'+i;
+    slot.style.backgroundImage = 'url(' + imgurLinks[i] + ')';
+    slot.classList.add('filled');
+    slot.dataset.img = imgurLinks[i];
+    
+    wrap.appendChild(slot);
+    const cap=document.createElement('span');
+    cap.className='hand text-pink-100/70 text-lg mt-2';
+    cap.textContent=captions[i];
+    wrap.appendChild(cap);
+    grid.appendChild(wrap);
+    wireSlot(slot);
+  }
+})();
+
+wireSlot(document.getElementById('miniSlot'));
+
+const imgOverlay=document.getElementById('imgOverlay');
+const overlayImg=document.getElementById('overlayImg');
+function openOverlay(src){ overlayImg.src=src; imgOverlay.classList.add('show'); }
+document.getElementById('overlayClose').addEventListener('click', ()=> imgOverlay.classList.remove('show'));
+imgOverlay.addEventListener('click', e=>{ if(e.target===imgOverlay) imgOverlay.classList.remove('show'); });
+
+const envelope=document.getElementById('envelope');
+const wax=document.getElementById('wax');
+const envStage=document.getElementById('envStage');
+const envHint=document.getElementById('envHint');
+const letterStage=document.getElementById('letterStage');
+let envOpened=false;
+
+const LETTER_LINES=[
+  "To my favourite Skittles hamoosa, Happy birthday to the one who turned",
+  "every ordinary day into something beautiful just by existing",
+  "I always look forward to.",
+  "making you happy and full of joy.",
+  "You make the whole world feel brighter,",
+  "and you are my favorite place to be.",
+  "I wish you all the happeniess and joy",
+  "Today is yours — every candle,",
+  "every wish, every little surprise.",
+  "enjoy your day because you desrve it. ♡",
+];
+
+function resetEnvelope(){
+  envOpened=false;
+  envelope.classList.remove('open','lift');
+  wax.classList.remove('cracked');
+  envStage.style.opacity='1'; envStage.style.visibility='visible';
+  letterStage.style.opacity='0'; letterStage.style.visibility='hidden';
+  envHint.style.opacity='1';
+  document.getElementById('iLoveYou').classList.remove('show');
+  document.getElementById('miniCard').classList.remove('show');
+  const body=document.getElementById('letterBody'); body.innerHTML='';
+}
+
+wax.addEventListener('click', openEnvelope);
+function openEnvelope(){
+  if(envOpened) return; envOpened=true;
+  wax.classList.add('cracked');
+  envHint.style.opacity='0';
+  setTimeout(()=> envelope.classList.add('open'), 260);
+  setTimeout(()=> envelope.classList.add('lift'), 1100);
+  setTimeout(()=>{
+    envStage.style.opacity='0'; envStage.style.visibility='hidden';
+    letterStage.style.opacity='1'; letterStage.style.visibility='visible';
+    revealLetter();
+  }, 1700);
+}
+
+function revealLetter(){
+  const body=document.getElementById('letterBody');
+  body.innerHTML='';
+  LETTER_LINES.forEach(t=>{
+    const p=document.createElement('p'); p.className='lline show'; p.textContent=''; p.dataset.full=t; body.appendChild(p);
+  });
+  const lines=[...body.querySelectorAll('.lline')];
+  let li=0, ci=0;
+  (function typeNext(){
+    if(li>=lines.length){
+      setTimeout(()=>{
+        document.getElementById('iLoveYou').classList.add('show');
+        setTimeout(()=> document.getElementById('miniCard').classList.add('show'), 1400);
+      }, 500);
+      return;
+    }
+    const line=lines[li], full=line.dataset.full;
+    if(ci<=full.length){
+      line.textContent=full.slice(0,ci);
+      ci++;
+      setTimeout(typeNext, 28);
+    } else {
+      li++; ci=0;
+      setTimeout(typeNext, 260);
+    }
+  })();
+}
+})();
+</script>
+
+</body>
+</html>
